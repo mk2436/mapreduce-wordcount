@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # NameNode
+  namenode:
+    image: harisekhon/hadoop:latest
+    container_name: namenode
+    environment:
+      - CLUSTER_NAME=DS644-hadoop-cluster-1
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    ports:
+      - "50070:50070"  # NameNode Web UI
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    networks:
+      hadoop_net:
+        ipv4_address: 172.28.0.2
+
+  # DataNode
+  datanode:
+    image: harisekhon/hadoop:latest
+    container_name: datanode
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    ports:
+      - "50075:50075"  # DataNode Web UI
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    networks:
+      hadoop_net:
+        ipv4_address: 172.28.0.3
+    depends_on:
+      - namenode
+
+  # ResourceManager
+  resourcemanager:
+    image: harisekhon/hadoop:latest
+    container_name: resourcemanager
+    environment:
+      - YARN_CONF_yarn_resourcemanager_address=resourcemanager:8032
+    ports:
+      - "8088:8088"  # ResourceManager Web UI
+    networks:
+      hadoop_net:
+        ipv4_address: 172.28.0.4
+    depends_on:
+      - namenode
+
+  # NodeManager
+  nodemanager:
+    image: harisekhon/hadoop:latest
+    container_name: nodemanager
+    environment:
+      - YARN_CONF_yarn_resourcemanager_address=resourcemanager:8032
+    networks:
+      hadoop_net:
+        ipv4_address: 172.28.0.5
+    depends_on:
+      - resourcemanager
+
+  # Hadoop Client (Ensure it stays alive)
+  #hadoop-client:
+  #  image: hadoop-client:latest  # Ensure this image has your XML files
+  #  container_name: hadoop-client
+  #  networks:
+  #    hadoop_net:
+  #      ipv4_address: 172.28.0.6
+  #  command: tail -f /dev/null  # Keeps the container running
+
+networks:
+  hadoop_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:

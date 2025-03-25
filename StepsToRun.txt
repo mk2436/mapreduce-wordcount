@@ -1,0 +1,24 @@
+1. Copy the wordcount.jar and input.txt provided in the zip folder into your Hadoop environment.
+
+2. Create a /input directory in HDFS using following command:
+	hdfs dfs -mkdir /input
+
+3. Copy the input file from the Hadoop environment to HDFS using following command:
+	hdfs dfs -put ./input.txt /input/input.txt
+
+4. To run the MapReduce job run the .jar file using the following command:
+	hadoop jar wordcount.jar WordCount /input /output
+	
+	PS: 	If /output directory already exists in the HDFS the java program will not run
+		So please make sure you delete any existing /output directory or simply use a
+		different path as follows:
+
+		hadoop jar wordcount.jar WordCount /input /<some-other-path>
+
+		Make sure this new path doesn't already exist in your hdfs.
+
+5. To view the output of the MapReduce job run the following command:
+	hdfs dfs -cat /output/part-r-00000
+
+6. To get the file from the HDFS run the following command:
+	hdfs dfs -get /output/part-r-00000 ./output.txt
